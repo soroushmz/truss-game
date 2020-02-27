@@ -1,3 +1,3 @@
-import main from './main';
+import startGame from './main';
 
 startGame();

@@ -1,8 +1,12 @@
 
-export default () => {
-
 function startGame() {
-    myGameArea.start();        
+    myGameArea.start();   
+    
+    var linearAlgebra = require('linear-algebra')(),     // initialise it
+    Vector = linearAlgebra.Vector,
+    Matrix = linearAlgebra.Matrix;
+
+    
     makeLine();
 }
 
@@ -263,5 +267,3 @@ var myGameArea = {
         rollSupport = new component(20,20, "red", 430, 200, "rollSupport");
     }
 }
-
-};
