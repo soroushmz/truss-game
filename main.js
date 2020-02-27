@@ -26,6 +26,8 @@ let snapTol = 15;
 let drawJoints = true;
 let jointColor = "red";
 let jointRadius = 5;
+//support lines width
+let supportLineWidth = 1;
 
 let data =
       '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"> \
@@ -47,11 +49,11 @@ svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
 url = DOMURL.createObjectURL(svg);
 img.onload = function() {
     ctx.drawImage(img, 0, 0);
-    DOMURL.revokeObjectURL(url);
+    // DOMURL.revokeObjectURL(url);
 };
 img.src = url;
-pinSupport = new component(20, 20, "red", 50, 200, "pinSupport");
-rollSupport = new component(20, 20, "red", 430, 200, "rollSupport");
+pinSupport = new component(20, 20, "black", 50, 200, "pinSupport");
+rollSupport = new component(20, 20, "black", 430, 200, "rollSupport");
 
 
 function clear() {
@@ -59,8 +61,8 @@ function clear() {
     img.onload();
     img.src = url;
 
-    pinSupport = new component(20, 20, "red", 50, 200, "pinSupport");
-    rollSupport = new component(20, 20, "red", 430, 200, "rollSupport");
+    pinSupport = new component(20, 20, "black", 50, 200, "pinSupport");
+    rollSupport = new component(20, 20, "black", 430, 200, "rollSupport");
 }
 
 
@@ -79,12 +81,16 @@ function component(baseWidth, height, color, x, y, type) {
   this.y = y - height;
 
   if (type == "pinSupport") {
+    ctx.lineWidth = supportLineWidth;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
     hatchPercent = 0.2;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x + baseWidth / 2, y);
     ctx.lineTo(x, y - height);
     ctx.lineTo(x - baseWidth / 2, y);
+    ctx.fillStyle = color;
     ctx.fill();
     ctx.moveTo(x - baseWidth, y);
     ctx.lineTo(x + baseWidth, y);
@@ -102,9 +108,13 @@ function component(baseWidth, height, color, x, y, type) {
       ctx.stroke();
     }
   } else if (type == "rollSupport") {
+    ctx.lineWidth = supportLineWidth;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
     hatchPercent = 0.2;
     ctx.beginPath();
     ctx.arc(x, y - height / 2, height / 2, 0, Math.PI * 2, true);
+    
     ctx.fill();
     ctx.moveTo(x - baseWidth, y);
     ctx.lineTo(x + baseWidth, y);
