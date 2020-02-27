@@ -3,7 +3,8 @@
 
 // import {f1} from './file1'
 // import f2 from './file1'
-id = "grid";
+
+let id = "grid";
 let canvas = document.getElementById(id);
 let ctx = canvas.getContext("2d");
 let canvasWidth = 480;
@@ -44,9 +45,9 @@ let data =
         </svg>';
 
 let DOMURL = window.URL || window.webkitURL || window;
-img = new Image();
-svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
-url = DOMURL.createObjectURL(svg);
+let img = new Image();
+let svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
+let url = DOMURL.createObjectURL(svg);
 img.onload = function() {
     ctx.drawImage(img, 0, 0);
     // DOMURL.revokeObjectURL(url);
@@ -58,6 +59,7 @@ rollSupport = new component(20, 20, "black", 430, 200, "rollSupport");
 
 function clear() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
     img.onload();
     img.src = url;
 
