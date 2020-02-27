@@ -15,8 +15,6 @@ ctx.canvas.height = canvasHeight;
 let xTol = 1;
 //line distance tolerance
 let deleteTol = 20;
-//canvas default tolerance
-let lineWidth = 1;
 //truss line color
 let trussColor = "black";
 //truss line width
@@ -29,50 +27,49 @@ let jointColor = "red";
 let jointRadius = 5;
 //support lines width
 let supportLineWidth = 1;
+//support hatch length
+let hatchPercent = 0.2;
 
-let data =
-      '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"> \
-            <defs> \
-                <pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse"> \
-                    <path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5" /> \
-                </pattern> \
-                <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"> \
-                    <rect width="80" height="80" fill="url(#smallGrid)" /> \
-                    <path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1" /> \
-                </pattern> \
-            </defs> \
-            <rect width="100%" height="100%" fill="url(#smallGrid)" /> \
-        </svg>';
+let data = `<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"> 
+            <defs>
+                <pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse"> 
+                    <path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5" /> 
+                </pattern> 
+                <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"> 
+                    <rect width="80" height="80" fill="url(#smallGrid)" /> 
+                    <path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1" /> 
+                </pattern> 
+            </defs> 
+            <rect width="100%" height="100%" fill="url(#smallGrid)" /> 
+        </svg>`;
 
 let DOMURL = window.URL || window.webkitURL || window;
 let img = new Image();
 let svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
 let url = DOMURL.createObjectURL(svg);
 img.onload = function() {
-    ctx.drawImage(img, 0, 0);
-    // DOMURL.revokeObjectURL(url);
+  ctx.drawImage(img, 0, 0);
+  // DOMURL.revokeObjectURL(url);
 };
 img.src = url;
-pinSupport = new component(20, 20, "black", 50, 200, "pinSupport");
-rollSupport = new component(20, 20, "black", 430, 200, "rollSupport");
-
+let pinSupport = new component(20, 20, "black", 50, 200, "pinSupport");
+let rollSupport = new component(20, 20, "black", 430, 200, "rollSupport");
 
 function clear() {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    img.onload();
-    img.src = url;
+  img.onload();
+  img.src = url;
 
-    pinSupport = new component(20, 20, "black", 50, 200, "pinSupport");
-    rollSupport = new component(20, 20, "black", 430, 200, "rollSupport");
+  pinSupport = new component(20, 20, "black", 50, 200, "pinSupport");
+  rollSupport = new component(20, 20, "black", 430, 200, "rollSupport");
 }
 
-
 function startGame() {
-//   f1();
-//   f2();
-    // let x = _.zip(['a', 'b'], [1, 2], [true, false]);
-    // console.log({x});
+  //   f1();
+  //   f2();
+  // let x = _.zip(['a', 'b'], [1, 2], [true, false]);
+  // console.log({x});
   makeLine();
 }
 
@@ -86,7 +83,6 @@ function component(baseWidth, height, color, x, y, type) {
     ctx.lineWidth = supportLineWidth;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
-    hatchPercent = 0.2;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x + baseWidth / 2, y);
@@ -97,14 +93,14 @@ function component(baseWidth, height, color, x, y, type) {
     ctx.moveTo(x - baseWidth, y);
     ctx.lineTo(x + baseWidth, y);
     ctx.stroke();
-    delta = height * hatchPercent;
-    NumberOfHatches = Math.floor(baseWidth / delta);
-    for (i = 0; i < NumberOfHatches; ++i) {
+    let delta = height * hatchPercent;
+    let NumberOfHatches = Math.floor(baseWidth / delta);
+    for (let i = 0; i < NumberOfHatches; ++i) {
       ctx.moveTo(x - baseWidth + (i - 1) * delta, y + delta);
       ctx.lineTo(x - baseWidth + i * delta, y);
       ctx.stroke();
     }
-    for (i = 0; i < NumberOfHatches + 1; ++i) {
+    for (let i = 0; i < NumberOfHatches + 1; ++i) {
       ctx.moveTo(x + (i - 1) * delta, y + delta);
       ctx.lineTo(x + i * delta, y);
       ctx.stroke();
@@ -113,22 +109,22 @@ function component(baseWidth, height, color, x, y, type) {
     ctx.lineWidth = supportLineWidth;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
-    hatchPercent = 0.2;
+
     ctx.beginPath();
     ctx.arc(x, y - height / 2, height / 2, 0, Math.PI * 2, true);
-    
+
     ctx.fill();
     ctx.moveTo(x - baseWidth, y);
     ctx.lineTo(x + baseWidth, y);
     ctx.stroke();
-    delta = height * hatchPercent;
-    NumberOfHatches = Math.floor(baseWidth / delta);
-    for (i = 0; i < NumberOfHatches; ++i) {
+    let delta = height * hatchPercent;
+    let NumberOfHatches = Math.floor(baseWidth / delta);
+    for (let i = 0; i < NumberOfHatches; ++i) {
       ctx.moveTo(x - baseWidth + (i - 1) * delta, y + delta);
       ctx.lineTo(x - baseWidth + i * delta, y);
       ctx.stroke();
     }
-    for (i = 0; i < NumberOfHatches + 1; ++i) {
+    for (let i = 0; i < NumberOfHatches + 1; ++i) {
       ctx.moveTo(x + (i - 1) * delta, y + delta);
       ctx.lineTo(x + i * delta, y);
       ctx.stroke();
@@ -177,7 +173,7 @@ function makeLine() {
 }
 
 function snapToPoint(point, pointList, tol) {
-  for (p of pointList) {
+  for (let p of pointList) {
     if (p.distanceTo(point) < tol) {
       return p;
     }
@@ -227,7 +223,7 @@ function drawLine(line) {
   ctx.moveTo(line.pointFirst.x, line.pointFirst.y);
   ctx.lineTo(line.pointSecond.x, line.pointSecond.y);
   ctx.stroke();
-  if ((drawJoints = true)) {
+  if (drawJoints == true) {
     ctx.fillStyle = jointColor;
     ctx.beginPath();
     ctx.arc(
@@ -274,7 +270,5 @@ function updateGameArea(line, lineList) {
   }
   return lineList;
 }
-
-
 
 startGame();
