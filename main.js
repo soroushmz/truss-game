@@ -1,4 +1,4 @@
-// import "linear-algebra";
+import LA from 'linear-algebra'
 // import _ from 'lodash'
 
 // import {f1} from './file1'
@@ -29,6 +29,8 @@ let jointRadius = 5;
 let supportLineWidth = 1;
 //support hatch length
 let hatchPercent = 0.2;
+//point number
+let pointNumber = 1;
 
 let data = `<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"> 
             <defs>
@@ -52,8 +54,18 @@ img.onload = function() {
   // DOMURL.revokeObjectURL(url);
 };
 img.src = url;
+
 let pinSupport = new component(20, 20, "black", 50, 200, "pinSupport");
 let rollSupport = new component(20, 20, "black", 430, 200, "rollSupport");
+
+
+let lineList = [];
+let pointList = [];
+let pinPoint = new Point(pinSupport.x, pinSupport.y, 0);
+pointNumber += 1;
+let rollPoint = new Point(rollSupport.x, rollSupport.y, 1);
+pointNumber += 1;
+pointList.push(pinPoint, rollPoint);
 
 function clear() {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -137,11 +149,7 @@ function makeLine() {
   let firstY = 0;
   let secondX = 0;
   let secondY = 0;
-  let lineList = [];
-  let pointList = [];
-  let pinPoint = new Point(pinSupport.x, pinSupport.y);
-  let rollPoint = new Point(rollSupport.x, rollSupport.y);
-  pointList.push(pinPoint, rollPoint);
+  
 
   onmousedown = function(e) {
     firstX = e.clientX;
@@ -151,8 +159,11 @@ function makeLine() {
     secondX = e.clientX;
     secondY = e.clientY;
     if (secondX != firstX || secondY != firstY) {
-      let pointFirst = new Point(firstX, firstY);
-      let pointSecond = new Point(secondX, secondY);
+
+      let pointFirst = new Point(firstX, firstY, pointNumber);
+      pointNumber += 1;
+      let pointSecond = new Point(secondX, secondY, pointNumber);
+      pointNumber += 1;
 
       pointFirst = snapToPoint(pointFirst, pointList, snapTol);
       pointSecond = snapToPoint(pointSecond, pointList, snapTol);
@@ -172,6 +183,32 @@ function makeLine() {
   };
 }
 
+function check(){
+
+  let countLine = 0;
+  let countSupport = 0;
+  let countBadPoints = 0;
+  for (let point of pointList){
+    for (let line of lineList){
+      if (point.number === line.pointFirst.number || point.number === line.pointSecond.number){
+        countLine += 1;
+      }
+    }
+    if (point.number == 0 || point.number == 1){
+      countSupport += 1;
+    }
+
+    if (countSupport == 0 && countLine < 2){
+      countBadPoints += 1;
+    }
+  }
+  if (countBadPoints > 0){
+    alert("There are "+countBadPoints+" joints that are not on a support or connected to at least two elements")
+  }
+
+}
+
+
 function snapToPoint(point, pointList, tol) {
   for (let p of pointList) {
     if (p.distanceTo(point) < tol) {
@@ -181,7 +218,8 @@ function snapToPoint(point, pointList, tol) {
   return point;
 }
 
-function Point(x, y) {
+function Point(x, y, number) {
+  this.number = number;
   this.x = x;
   this.y = y;
   this.distanceTo = function(P) {
