@@ -31,25 +31,15 @@ let supportLineWidth = 1;
 let hatchPercent = 0.2;
 //point number
 let pointNumber = 0;
-<<<<<<< HEAD
 // element area in m^2 so element stress is in MPa
 let Area = 1;
 // element modulus in kN/m^2
-=======
-// element area
-let Area = 1e-2;
-// element modulus
->>>>>>> 21fb1ef9cbe2646ea65ec7e6275673feef561be6
 let E = 200e6;
 // stiffness matrix initialization
 let stiffMatrix;
 // force matrix initilization
 let forceMatrix;
-<<<<<<< HEAD
 // weight force in kN
-=======
-// weight force
->>>>>>> 21fb1ef9cbe2646ea65ec7e6275673feef561be6
 let weightForce = 1e3;
 
 //support and weight info
@@ -128,12 +118,9 @@ let xyConstraintList = [0]; // list of points with xy constraint
 let xConstraintList = []; // list of points with x constraint
 let yConstraintList = [1]; // list of points with y constraint
 
-<<<<<<< HEAD
 let rowsTemp; //which degrees of freedom are active
 let solution;
 
-=======
->>>>>>> 21fb1ef9cbe2646ea65ec7e6275673feef561be6
 let checkDiv = document.getElementById("checkTrussButton");
 const checkButton = document.createElement("button");
 checkButton.innerHTML = "Check!";
@@ -163,7 +150,6 @@ const anaButton = document.createElement("button");
 anaButton.innerHTML = "Analyze!";
 anaDiv.append(anaButton);
 anaButton.addEventListener("click", Analyze);
-<<<<<<< HEAD
 
 let stressDiv = document.getElementById("stressResult");
 const stressButton = document.createElement("button");
@@ -171,8 +157,7 @@ stressButton.innerHTML = "Stress Results!";
 stressDiv.append(stressButton);
 stressButton.addEventListener("click", stressResults);
 
-=======
->>>>>>> 21fb1ef9cbe2646ea65ec7e6275673feef561be6
+
 
 function clear() {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -204,10 +189,7 @@ function clear() {
     weightSupportY,
     "weight"
   );
-<<<<<<< HEAD
   lineList = [];
-=======
->>>>>>> 21fb1ef9cbe2646ea65ec7e6275673feef561be6
   pointList = [];
   pointList.push(pinPoint, rollPoint, weightPoint);
 }
@@ -339,10 +321,7 @@ function makeLine() {
 
 function globalStiffness() {
   let numberPoints = pointList.length;
-<<<<<<< HEAD
-=======
-  let numberLines = lineList.length;
->>>>>>> 21fb1ef9cbe2646ea65ec7e6275673feef561be6
+
   stiffMatrix = math.zeros(numberPoints * 2, numberPoints * 2);
   let count = 0; // counter for points
   let countBreak = 0; // counter for two line endpoints
@@ -368,7 +347,6 @@ function globalStiffness() {
         countPointSecond = count;
         countBreak += 1;
       }
-<<<<<<< HEAD
 
       if (countPointFirst !== -1 && countPointSecond !== -1) {
         stiffMatrix._data[countPointFirst][countPointSecond] +=
@@ -456,19 +434,20 @@ function stressResults(){
   let count = 0;
   let countPoint = 0;
   let stress;
-  let csMatrix;
-  let elementDisp = math.matrix(math.zeros([4,1]), 'dense');
+  // let csMatrix;
+  let newPointX1, newPointX2, newPointY1, newPointY2, newLength, deltaLength;
+  // let elementDisp = math.matrix(math.zeros([4,1]), 'dense');
   let lineStress = [];
   for (let line of lineList){
     for (let point of pointList){
       if (point.number === line.pointFirst.number){
-        elementDisp._data[0][0] = generalSolution[count];
-        elementDisp._data[1][0] = generalSolution[count + 1];
+        newPointX1 = line.pointFirst.x + generalSolution[count];
+        newPointY1 = line.pointFirst.y + generalSolution[count + 1];
         countPoint += 1;
       }
       if (point.number === line.pointSecond.number){
-        elementDisp._data[2][0] = generalSolution[count];
-        elementDisp._data[3][0] = generalSolution[count + 1];
+        newPointX2 = line.pointSecond.x + generalSolution[count];
+        newPointY2 = line.pointSecond.y + generalSolution[count + 1];
         countPoint += 1;
       }
       if (countPoint === 2){
@@ -476,10 +455,10 @@ function stressResults(){
       }
       count += 2;
     }
-    csMatrix = math.transpose(math.matrix([- line.c, -line.s, line.c, line.s]));
-    stress = math.multiply(math.multiply(csMatrix, E / line.len), elementDisp);
-    lineStress.push(stress._data[0]);
-    elementDisp = math.matrix(math.zeros([4,1]), 'dense');
+    newLength = ((newPointX2 - newPointX1) ** 2+(newPointY2 - newPointY1) ** 2)**0.5;
+    deltaLength = newLength - line.len;
+    stress = E * deltaLength / line.len;
+    lineStress.push(stress);
     countPoint = 0;
     count = 0;
   }
@@ -487,84 +466,6 @@ function stressResults(){
 }
 
 
-=======
-
-      if (countPointFirst !== -1 && countPointSecond !== -1) {
-        stiffMatrix._data[countPointFirst][countPointSecond] +=
-          -line.c2 / line.len;
-        stiffMatrix._data[countPointFirst][countPointSecond + 1] +=
-          -line.cs / line.len;
-        stiffMatrix._data[countPointFirst + 1][countPointSecond] +=
-          -line.cs / line.len;
-        stiffMatrix._data[countPointFirst + 1][countPointSecond + 1] +=
-          -line.s2 / line.len;
-
-        stiffMatrix._data[countPointSecond][countPointFirst] +=
-          -line.c2 / line.len;
-        stiffMatrix._data[countPointSecond + 1][countPointFirst] +=
-          -line.cs / line.len;
-        stiffMatrix._data[countPointSecond][countPointFirst + 1] +=
-          -line.cs / line.len;
-        stiffMatrix._data[countPointSecond + 1][countPointFirst + 1] +=
-          -line.s2 / line.len;
-        countPointFirst = -1;
-        countPointSecond = -1;
-        countBreak += 1;
-      }
-      if (countBreak === 3) {
-        break;
-      }
-      count += 2;
-    }
-    count = 0;
-  }
-
-  forceMatrix = math.zeros(numberPoints * 2);
-  count = 0;
-  for (let point of pointList) {
-    if (point.number === 2) {
-      forceMatrix._data[count + 1] = weightForce;
-    }
-    count += 1;
-  }
-
-  return [stiffMatrix, forceMatrix];
-}
-
-function applyBoundary() {
-  let count = 0;
-  let rowsTemp = [...Array(stiffMatrix._size[0]).keys()];
-  for (let point of pointList) {
-    if (xyConstraintList.includes(point.number)) {
-      rowsTemp = arrayRemove(count, rowsTemp);
-      rowsTemp = arrayRemove(count + 1, rowsTemp);
-    }
-    if (xConstraintList.includes(point.number)) {
-      rowsTemp = arrayRemove(count, rowsTemp);
-    }
-    if (yConstraintList.includes(point.number)) {
-      rowsTemp = arrayRemove(count + 1, rowsTemp);
-    }
-    count += 2;
-  }
-  stiffMatrix = math.subset(stiffMatrix, math.index(rowsTemp, rowsTemp));
-  forceMatrix = math.subset(forceMatrix, math.index(rowsTemp));
-
-  return [stiffMatrix, forceMatrix];
-}
-
-function Analyze() {
-  try {
-    let solution = math.lusolve(
-      math.multiply(stiffMatrix, E * Area),
-      forceMatrix
-    );
-  } catch (err) {
-    alert("Truss unstable!");
-  }
-}
-
->>>>>>> 21fb1ef9cbe2646ea65ec7e6275673feef561be6
 function addUniquePoint(point, pointList) {
   for (let p of pointList) {
     if (point.number == p.number) {
@@ -728,11 +629,8 @@ function Line(pointFirst, pointSecond, tol) {
   this.c2 = Math.cos(this.theta) ** 2;
   this.cs = Math.cos(this.theta) * Math.sin(this.theta);
   this.s2 = Math.sin(this.theta) ** 2;
-<<<<<<< HEAD
   this.c = Math.cos(this.theta);
   this.s = Math.sin(this.theta);
-=======
->>>>>>> 21fb1ef9cbe2646ea65ec7e6275673feef561be6
 }
 
 function updateGameArea(line, lineList, pointList) {
