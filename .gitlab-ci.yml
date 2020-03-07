@@ -5,10 +5,7 @@ pages:
   script:
   - npm install
   - npm start
-  - mv dist/* public
-  artifacts:
-    paths:
-    - public
+  - mv dist/* build
   only:
   - master
  
