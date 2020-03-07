@@ -1,8 +1,10 @@
-pages:  
+pages:
   stage: deploy
-  artifacts:  
-     paths:  
-       - public
-
-  only:  
-    - master 
+  script:
+  - echo 'Nothing to do...'
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
+ 
