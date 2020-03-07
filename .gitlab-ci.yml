@@ -5,7 +5,7 @@ pages:
   script:
   - npm install
   - npm start
-  - mv dist/* build
+  - mv dist/* pages
   only:
   - master
  
