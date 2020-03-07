@@ -711,7 +711,9 @@ function updateGameArea(line, lineListLoc, pointListLoc) {
   for (let lineIter of lineListLoc) {
     drawLine(lineIter);
   }
-  return [lineListLoc, pointListLoc];
+  lineList = lineListLoc;
+  pointList = pointListLoc;
+  return [lineList, pointList];
 }
 
 startGame();
