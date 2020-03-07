@@ -18,7 +18,3 @@ cache:
 test_async:
   script:
     - npm install
-
-test_db:
-  script:
-    - npm install
