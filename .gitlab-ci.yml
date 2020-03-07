@@ -6,6 +6,9 @@ pages:
   - npm install
   - npm start
   - mv dist/* public
+  artifacts:
+          path:
+                  - public
   only:
   - master
  
