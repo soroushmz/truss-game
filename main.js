@@ -703,7 +703,7 @@ function Line(pointFirst, pointSecond, tol) {
 function updateGameArea(line, lineListLoc, pointListLoc) {
   pointListLoc = arrayRemovePoint(line.pointFirst, pointListLoc);
   pointListLoc = arrayRemovePoint(line.pointSecond, pointListLoc);
-  lineList = arrayRemove(line, lineListLoc);
+  lineListLoc = arrayRemove(line, lineListLoc);
   clearScreen();
   drawSupports();
   emptyVars();
