@@ -708,7 +708,7 @@ function updateGameArea(line, lineListLoc, pointListLoc) {
   drawSupports();
   emptyVars();
 
-  for (let lineIter of lineList) {
+  for (let lineIter of lineListLoc) {
     drawLine(lineIter);
   }
   return [lineListLoc, pointListLoc];
