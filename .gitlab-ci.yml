@@ -5,6 +5,7 @@ pages:
   script:
   - npm install
   - npm start
+  - mkdir public
   - mv dist/* public
   artifacts:
     paths:
