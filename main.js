@@ -31,8 +31,8 @@ let supportLineWidth = 1;
 let hatchPercent = 0.2;
 //point number
 let pointNumber = 0;
-// element area in m^2 so element stress is in MPa
-let Area = 1;
+// element area in m^2 so element stress is in kN/m^2
+let Area = 1e-4;
 // element modulus in kN/m^2
 let E = 200e6;
 // stiffness matrix initialization
@@ -40,7 +40,13 @@ let stiffMatrix;
 // force matrix initilization
 let forceMatrix;
 // weight force in kN
-let weightForce = 1e3;
+let weightForce = 4e3;
+// element yield stress
+let Fy = 350;
+// length multiplier, length in m
+let lenScale = 1e-2;
+//stree multiplier to make it in MPa
+let stressScale = 1e-3;
 
 //support and weight info
 let pinSupportX = 50;
@@ -120,6 +126,7 @@ let yConstraintList = [1]; // list of points with y constraint
 
 let rowsTemp; //which degrees of freedom are active
 let solution;
+let lineStress = [];
 
 let checkDiv = document.getElementById("checkTrussButton");
 const checkButton = document.createElement("button");
@@ -157,14 +164,26 @@ stressButton.innerHTML = "Stress Results!";
 stressDiv.append(stressButton);
 stressButton.addEventListener("click", stressResults);
 
+let drawDiv = document.getElementById("drawResult");
+const drawButton = document.createElement("button");
+drawButton.innerHTML = "Draw Results!";
+drawDiv.append(drawButton);
+drawButton.addEventListener("click", drawResults);
 
+function clear(){
+  clearScreen();
+  drawSupports();
+  emptyVars();
+}
 
-function clear() {
+function clearScreen(){
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
   img.onload();
   img.src = url;
+}
 
+function drawSupports(){
   pinSupport = new component(
     supportWidth,
     supportHeight,
@@ -189,9 +208,14 @@ function clear() {
     weightSupportY,
     "weight"
   );
+}
+
+function emptyVars(){
   lineList = [];
   pointList = [];
   pointList.push(pinPoint, rollPoint, weightPoint);
+  solution = [];
+  lineStress = [];
 }
 
 function startGame() {
@@ -415,49 +439,48 @@ function applyBoundary() {
 
 function Analyze() {
   try {
-    solution = math.lusolve(
-      math.multiply(stiffMatrix, E * Area),
-      forceMatrix
-    );
+    solution = math.lusolve(math.multiply(stiffMatrix, E * Area), forceMatrix);
   } catch (err) {
     alert("Truss unstable!");
   }
 }
 
-function stressResults(){
+function stressResults() {
   let generalSolution = Array(pointList.length * 2).fill(0);
 
-  for (let i = 0; i < rowsTemp.length; ++i){
+  for (let i = 0; i < rowsTemp.length; ++i) {
     generalSolution[rowsTemp[i]] = solution._data[i][0];
   }
 
   let count = 0;
   let countPoint = 0;
-  let stress;
+  let stress = 0;
+  lineStress = [];
   // let csMatrix;
   let newPointX1, newPointX2, newPointY1, newPointY2, newLength, deltaLength;
   // let elementDisp = math.matrix(math.zeros([4,1]), 'dense');
-  let lineStress = [];
-  for (let line of lineList){
-    for (let point of pointList){
-      if (point.number === line.pointFirst.number){
+  for (let line of lineList) {
+    for (let point of pointList) {
+      if (point.number === line.pointFirst.number) {
         newPointX1 = line.pointFirst.x + generalSolution[count];
         newPointY1 = line.pointFirst.y + generalSolution[count + 1];
         countPoint += 1;
       }
-      if (point.number === line.pointSecond.number){
+      if (point.number === line.pointSecond.number) {
         newPointX2 = line.pointSecond.x + generalSolution[count];
         newPointY2 = line.pointSecond.y + generalSolution[count + 1];
         countPoint += 1;
       }
-      if (countPoint === 2){
+      if (countPoint === 2) {
         break;
       }
       count += 2;
     }
-    newLength = ((newPointX2 - newPointX1) ** 2+(newPointY2 - newPointY1) ** 2)**0.5;
+    newLength =
+      lenScale *
+      ((newPointX2 - newPointX1) ** 2 + (newPointY2 - newPointY1) ** 2) ** 0.5;
     deltaLength = newLength - line.len;
-    stress = E * deltaLength / line.len;
+    stress = ((E * deltaLength) / line.len) * stressScale;
     lineStress.push(stress);
     countPoint = 0;
     count = 0;
@@ -465,6 +488,20 @@ function stressResults(){
   return lineStress;
 }
 
+function drawResults() {
+  drawStressFigure(lineList, lineStress);
+}
+
+function drawStressFigure(lineListLoc, lineStressLoc){
+  clearScreen();
+  drawSupports();
+  debugger;
+  let count = 0;
+  for (let lineIter of lineListLoc) {
+    drawLine(lineIter, lineStressLoc[count]);
+    count += 1;
+  }
+}
 
 function addUniquePoint(point, pointList) {
   for (let p of pointList) {
@@ -574,9 +611,38 @@ function isPointOnLine(point, Line, tol) {
   }
 }
 
-function drawLine(line) {
+function stressColor(stress) {
+  let ratio = Math.abs(stress) / Fy;
+  let black = [0, 0, 0];
+  let blue = [0, 0, 255];
+  let green = [0, 255, 0];
+  let red = [255, 0, 0];
+  let color = [0, 0, 0];
+  if (ratio >= 0 && ratio <= 0.33) {
+    color[0] = 0;
+    color[1] = 0;
+    color[2] = Math.floor((ratio / 0.33) * 255);
+  } else if (ratio > 0.33 && ratio <= 0.66) {
+    color[0] = 0;
+    color[1] = Math.floor(((ratio - 0.33) / 0.33) * 255);
+    color[2] = Math.floor((1 - (ratio - 0.33) / 0.33) * 255);
+  } else if (ratio > 0.66) {
+    color[0] = Math.floor(((ratio - 0.66) / 0.33) * 255);
+    color[1] = Math.floor((1 - (ratio - 0.66) / 0.33) * 255);
+    color[2] = 0;
+  }
+  return "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
+}
+
+function drawLine(line, lineStress = 0) {
   ctx.lineWidth = trussWidth;
-  ctx.strokeStyle = trussColor;
+  if (lineStress === 0) {
+    // ctx.strokeStyle = trussColor;
+    ctx.strokeStyle = trussColor;
+  } else {
+    ctx.strokeStyle = stressColor(lineStress);
+  }
+
   ctx.beginPath();
   ctx.moveTo(line.pointFirst.x, line.pointFirst.y);
   ctx.lineTo(line.pointSecond.x, line.pointSecond.y);
@@ -625,7 +691,8 @@ function Line(pointFirst, pointSecond, tol) {
   this.len =
     ((pointFirst.x - pointSecond.x) ** 2 +
       (pointFirst.y - pointSecond.y) ** 2) **
-    0.5;
+      0.5 *
+    lenScale;
   this.c2 = Math.cos(this.theta) ** 2;
   this.cs = Math.cos(this.theta) * Math.sin(this.theta);
   this.s2 = Math.sin(this.theta) ** 2;
@@ -633,15 +700,18 @@ function Line(pointFirst, pointSecond, tol) {
   this.s = Math.sin(this.theta);
 }
 
-function updateGameArea(line, lineList, pointList) {
-  pointList = arrayRemovePoint(line.pointFirst, pointList);
-  pointList = arrayRemovePoint(line.pointSecond, pointList);
-  lineList = arrayRemove(line, lineList);
-  clear();
+function updateGameArea(line, lineListLoc, pointListLoc) {
+  pointListLoc = arrayRemovePoint(line.pointFirst, pointListLoc);
+  pointListLoc = arrayRemovePoint(line.pointSecond, pointListLoc);
+  lineList = arrayRemove(line, lineListLoc);
+  clearScreen();
+  drawSupports();
+  emptyVars();
+
   for (let lineIter of lineList) {
     drawLine(lineIter);
   }
-  return [lineList, pointList];
+  return [lineListLoc, pointListLoc];
 }
 
 startGame();
