@@ -495,7 +495,6 @@ function drawResults() {
 function drawStressFigure(lineListLoc, lineStressLoc){
   clearScreen();
   drawSupports();
-  debugger;
   let count = 0;
   for (let lineIter of lineListLoc) {
     drawLine(lineIter, lineStressLoc[count]);
@@ -592,7 +591,9 @@ function arrayRemovePoint(point, pointList) {
 
 function isPointOnLine(point, Line, tol) {
   if (Line.a === undefined) {
-    if (Math.abs(point.x - Line.pointFirst.x) < tol) {
+    if (Math.abs(point.x - Line.pointFirst.x) < tol &&
+        ((point.y >= Line.pointFirst.y && point.y <= Line.pointSecond.y)
+        || (point.y <= Line.pointFirst.y && point.y >= Line.pointSecond.y))) {
       return true;
     } else {
       return false;
@@ -607,7 +608,11 @@ function isPointOnLine(point, Line, tol) {
     let intersectY = Line.a * intersectX + Line.b;
     let dist =
       ((point.x - intersectX) ** 2 + (point.y - intersectY) ** 2) ** 0.5;
-    return dist < tol ? true : false;
+    let intersectOnLineBoundary = ((intersectX >= Line.pointFirst.x && intersectX <= Line.pointSecond.x) 
+    || (intersectX <= Line.pointFirst.x && intersectX >= Line.pointSecond.x)) 
+        && ((intersectY >= Line.pointFirst.y && intersectY <= Line.pointSecond.y) 
+        || (intersectY <= Line.pointFirst.y && intersectY >= Line.pointSecond.y));
+    return (dist < tol && intersectOnLineBoundary) ? true : false;
   }
 }
 
