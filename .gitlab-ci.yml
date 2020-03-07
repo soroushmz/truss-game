@@ -1,6 +1,9 @@
+image: node:latest
+
 pages:
   stage: deploy
   script:
+  - npm install
   - npm start
   artifacts:
     paths:
