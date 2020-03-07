@@ -4,7 +4,7 @@ pages:
   stage: deploy
   script:
   - npm install
-  - npm start
+  - npm run-script build
   - mv dist/* public
   artifacts:
           paths:
