@@ -7,7 +7,7 @@ pages:
   - npm start
   - mv dist/* public
   artifacts:
-          path:
+          paths:
                   - public
   only:
   - master
