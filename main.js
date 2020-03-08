@@ -1,4 +1,6 @@
 const math = require("mathjs");
+
+import './index.css'
 // import _ from 'lodash'
 
 // import {f1} from './file1'
@@ -128,47 +130,50 @@ let rowsTemp; //which degrees of freedom are active
 let solution;
 let lineStress = [];
 
-let checkDiv = document.getElementById("checkTrussButton");
+let checkDiv = document.getElementById("root");
 const checkButton = document.createElement("button");
 checkButton.innerHTML = "Check!";
-checkDiv.append(checkButton);
 checkButton.addEventListener("click", checkTruss);
+checkButton.classList.add("root");
+checkDiv.append(checkButton);
 
-let clearDiv = document.getElementById("clearBoard");
 const clearButton = document.createElement("button");
 clearButton.innerHTML = "Clear!";
-clearDiv.append(clearButton);
+clearButton.classList.add("root");
 clearButton.addEventListener("click", clear);
+checkDiv.append(clearButton);
 
-let stiffDiv = document.getElementById("globalStiffness");
 const stiffButton = document.createElement("button");
 stiffButton.innerHTML = "Global Stiffness!";
-stiffDiv.append(stiffButton);
 stiffButton.addEventListener("click", globalStiffness);
+stiffButton.classList.add("root");
+checkDiv.append(stiffButton);
 
-let boundDiv = document.getElementById("applyBoundary");
 const boundButton = document.createElement("button");
 boundButton.innerHTML = "Apply Boundary!";
-boundDiv.append(boundButton);
+boundButton.classList.add("root");
 boundButton.addEventListener("click", applyBoundary);
+checkDiv.append(boundButton);
 
-let anaDiv = document.getElementById("Analyze");
 const anaButton = document.createElement("button");
 anaButton.innerHTML = "Analyze!";
-anaDiv.append(anaButton);
+anaButton.classList.add("root");
+checkDiv.append(anaButton);
 anaButton.addEventListener("click", Analyze);
 
-let stressDiv = document.getElementById("stressResult");
 const stressButton = document.createElement("button");
 stressButton.innerHTML = "Stress Results!";
-stressDiv.append(stressButton);
+stressButton.classList.add("root");
 stressButton.addEventListener("click", stressResults);
+checkDiv.append(stressButton);
 
-let drawDiv = document.getElementById("drawResult");
+
 const drawButton = document.createElement("button");
 drawButton.innerHTML = "Draw Results!";
-drawDiv.append(drawButton);
+drawButton.classList.add("root");
 drawButton.addEventListener("click", drawResults);
+checkDiv.append(drawButton);
+
 
 function clear(){
   clearScreen();
