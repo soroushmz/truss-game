@@ -50,6 +50,14 @@ let lenScale = 1e-2;
 //stree multiplier to make it in MPa
 let stressScale = 1e-3;
 
+// stress results color scale properties
+let colorScaleX = 50;
+let colorScaleY = 220;
+let colorScaleWidth = 100;
+let colorScaleHeight = 10;
+let colorScaleFontSize = 10;
+
+
 //support and weight info
 let pinSupportX = 50;
 let pinSupportY = 200;
@@ -339,7 +347,8 @@ function makeLine() {
   };
   ondblclick = function(e) {
     let point = new Point(e.clientX, e.clientY);
-    for (let line of lineList) {
+    let temp = lineList;
+    for (let line of temp) {
       if (isPointOnLine(point, line, deleteTol)) {
         [lineList, pointList] = updateGameArea(line, lineList, pointList);
         break;
@@ -505,6 +514,25 @@ function drawStressFigure(lineListLoc, lineStressLoc){
     drawLine(lineIter, lineStressLoc[count]);
     count += 1;
   }
+  drawScale();
+}
+
+function drawScale(){
+  ctx.font = colorScaleFontSize + "px Arial";
+  
+  var grd = ctx.createLinearGradient(colorScaleX,0,colorScaleX + colorScaleWidth,0);
+  grd.addColorStop(0,"black");
+  grd.addColorStop(0.25,"blue");
+  grd.addColorStop(0.5,"green");
+  grd.addColorStop(0.75,"red");
+  grd.addColorStop(1,"purple");
+
+  // Fill with gradient
+  ctx.fillStyle = grd;
+  ctx.fillRect(colorScaleX, colorScaleY, colorScaleWidth, colorScaleHeight);
+  ctx.fillStyle = "black";
+  ctx.fillText("0", colorScaleX, colorScaleY + colorScaleHeight + colorScaleFontSize);
+  ctx.fillText("1", colorScaleX + Math.floor(0.75 * colorScaleWidth), colorScaleY + colorScaleHeight+ colorScaleFontSize);
 }
 
 function addUniquePoint(point, pointList) {
@@ -628,18 +656,22 @@ function stressColor(stress) {
   let green = [0, 255, 0];
   let red = [255, 0, 0];
   let color = [0, 0, 0];
-  if (ratio >= 0 && ratio <= 0.33) {
+  if (ratio >= 0 && ratio <= 0.33) { // color blue
     color[0] = 0;
     color[1] = 0;
     color[2] = Math.floor((ratio / 0.33) * 255);
-  } else if (ratio > 0.33 && ratio <= 0.66) {
+  } else if (ratio > 0.33 && ratio <= 0.66) { // color blue to green
     color[0] = 0;
     color[1] = Math.floor(((ratio - 0.33) / 0.33) * 255);
     color[2] = Math.floor((1 - (ratio - 0.33) / 0.33) * 255);
-  } else if (ratio > 0.66) {
+  } else if (ratio > 0.66 && ratio <= 1.0) { // color green to red
     color[0] = Math.floor(((ratio - 0.66) / 0.33) * 255);
     color[1] = Math.floor((1 - (ratio - 0.66) / 0.33) * 255);
     color[2] = 0;
+  } else if (ratio > 1){ // color purple
+    color[0] = 255;
+    color[1] = 0;
+    color[2] = 255;
   }
   return "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
 }
@@ -711,8 +743,19 @@ function Line(pointFirst, pointSecond, tol) {
 }
 
 function updateGameArea(line, lineListLoc, pointListLoc) {
-  pointListLoc = arrayRemovePoint(line.pointFirst, pointListLoc);
-  pointListLoc = arrayRemovePoint(line.pointSecond, pointListLoc);
+  let count = 0;
+  for (let lineIter of lineListLoc){
+    if (line.pointFirst.number === lineIter.pointFirst.number || line.pointFirst.number === lineIter.pointSecond.number ||
+      line.pointSecond.number === lineIter.pointFirst.number || line.pointSecond.number === lineIter.pointSecond.number){
+        count += 1;
+        break;
+      }
+  }
+  if (count === 0){
+    pointListLoc = arrayRemovePoint(line.pointFirst, pointListLoc);
+    pointListLoc = arrayRemovePoint(line.pointSecond, pointListLoc);
+  }
+  
   lineListLoc = arrayRemove(line, lineListLoc);
   clearScreen();
   drawSupports();
