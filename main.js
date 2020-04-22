@@ -1,4 +1,6 @@
-const math = require("mathjs");
+// const math = require("mathjs");
+import math from "mathjs"
+import Matter from "matter-js";
 
 import './index.css'
 // import _ from 'lodash'
@@ -456,6 +458,7 @@ function Analyze() {
     solution = math.lusolve(math.multiply(stiffMatrix, E * Area), forceMatrix);
   } catch (err) {
     alert("Truss unstable!");
+    playAnimation();
   }
 }
 
@@ -741,6 +744,111 @@ function Line(pointFirst, pointSecond, tol) {
   this.c = Math.cos(this.theta);
   this.s = Math.sin(this.theta);
 }
+
+
+function playAnimation(){
+    // import decomp from "poly-decomp";
+
+  // window.decomp = decomp;
+
+  
+
+  var myCanvas = document.getElementById("world");
+
+  let canvasWidth = 480;
+  let canvasHeight = 270;
+
+  // module aliases
+  var Engine = Matter.Engine,
+    Render = Matter.Render,
+    World = Matter.World,
+    Bodies = Matter.Bodies,
+    Constraint = Matter.Constraint;
+
+  // create an engine
+  var engine = Engine.create();
+
+  // create a renderer
+  var render = Render.create({
+    canvas: myCanvas,
+    element: document.body,
+    engine: engine,
+    options: {
+      width: canvasWidth,
+      height: canvasHeight,
+      // background: 'transparent',
+      background: "black",
+      wireframes: false,
+      showAngleIndicator: false,
+    },
+  });
+
+  // var body = Bodies.polygon(150, 200, 5, 30);
+
+  // var constraint = Constraint.create({
+  //   pointA: { x: 100, y: 100 },
+  //   bodyB: body,
+  //   pointB: { x: 0, y: 0 },
+  // });
+  // var vertices = [{x:0, y:0},{x:100, y:100}, {x:50, y:100}, {x:0, y:0}];
+  // var shape = Matter.Vertices.create(vertices);
+  // // create two boxes and a ground
+  // // var boxA = Bodies.rectangle(400, 200, 80, 80);
+  // // var boxB = Bodies.rectangle(450, 50, 80, 80);
+  var frameA = Bodies.rectangle(100, 100, 50, 10, {
+  //   angle: (10 / 180) * Math.PI,
+  //   isStatic: true,
+    render: {
+      fillStyle: "white",
+      strokeStyle: "white",
+      lineWidth: 1,
+    },
+  });
+
+  var frameB = Bodies.rectangle(150, 100, 50, 10, {
+      // angle: (10 / 180) * Math.PI,
+      // isStatic: true,
+      render: {
+        fillStyle: "white",
+        strokeStyle: "white",
+        lineWidth: 1,
+      },
+    });
+
+    var constraintMult = Constraint.create({
+      bodyA: frameA,
+      pointA: { x: 25, y: 0 },
+      bodyB: frameB,
+      pointB: { x: -25, y: 0 }
+  });
+
+  var constraint = Constraint.create({
+      pointA: { x: 75, y: 100 },
+      bodyB: frameA,
+      pointB: { x: -25, y: 0 },
+    });
+
+  var ground = Bodies.rectangle(
+    canvasWidth / 2,
+    canvasHeight - 10,
+    canvasWidth,
+    10,
+    { isStatic: true }
+  );
+
+  // add all of the bodies to the world
+  World.add(engine.world, [ frameA , frameB, constraint, constraintMult,ground]);
+  // World.add(engine.world, [body, constraint]);
+
+  // run the engine
+  Engine.run(engine);
+
+  // run the renderer
+  Render.run(render);
+
+
+}
+
 
 function updateGameArea(line, lineListLoc, pointListLoc) {
   let count = 0;
