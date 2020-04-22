@@ -1,16 +1,16 @@
-// const math = require("mathjs");
-import math from "mathjs"
+const math = require("mathjs");
+// import math from "mathjs"
 import Matter from "matter-js";
 
-import './index.css'
+import "./index.css";
 // import _ from 'lodash'
 
 // import {f1} from './file1'
 // import f2 from './file1'
 
 let id = "grid";
-let canvas = document.getElementById(id);
-let ctx = canvas.getContext("2d");
+let canvasID = document.getElementById(id);
+let ctx = canvasID.getContext("2d");
 let canvasWidth = 480;
 let canvasHeight = 270;
 ctx.canvas.width = canvasWidth;
@@ -59,7 +59,6 @@ let colorScaleWidth = 100;
 let colorScaleHeight = 10;
 let colorScaleFontSize = 10;
 
-
 //support and weight info
 let pinSupportX = 50;
 let pinSupportY = 200;
@@ -90,7 +89,7 @@ let DOMURL = window.URL || window.webkitURL || window;
 let img = new Image();
 let svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
 let url = DOMURL.createObjectURL(svg);
-img.onload = function() {
+img.onload = function () {
   ctx.drawImage(img, 0, 0);
   // DOMURL.revokeObjectURL(url);
 };
@@ -153,17 +152,17 @@ clearButton.classList.add("root");
 clearButton.addEventListener("click", clear);
 checkDiv.append(clearButton);
 
-const stiffButton = document.createElement("button");
-stiffButton.innerHTML = "Global Stiffness!";
-stiffButton.addEventListener("click", globalStiffness);
-stiffButton.classList.add("root");
-checkDiv.append(stiffButton);
+// const stiffButton = document.createElement("button");
+// stiffButton.innerHTML = "Global Stiffness!";
+// stiffButton.addEventListener("click", globalStiffness);
+// stiffButton.classList.add("root");
+// checkDiv.append(stiffButton);
 
-const boundButton = document.createElement("button");
-boundButton.innerHTML = "Apply Boundary!";
-boundButton.classList.add("root");
-boundButton.addEventListener("click", applyBoundary);
-checkDiv.append(boundButton);
+// const boundButton = document.createElement("button");
+// boundButton.innerHTML = "Apply Boundary!";
+// boundButton.classList.add("root");
+// boundButton.addEventListener("click", applyBoundary);
+// checkDiv.append(boundButton);
 
 const anaButton = document.createElement("button");
 anaButton.innerHTML = "Analyze!";
@@ -171,34 +170,60 @@ anaButton.classList.add("root");
 checkDiv.append(anaButton);
 anaButton.addEventListener("click", Analyze);
 
-const stressButton = document.createElement("button");
-stressButton.innerHTML = "Stress Results!";
-stressButton.classList.add("root");
-stressButton.addEventListener("click", stressResults);
-checkDiv.append(stressButton);
+// const stressButton = document.createElement("button");
+// stressButton.innerHTML = "Stress Results!";
+// stressButton.classList.add("root");
+// stressButton.addEventListener("click", stressResults);
+// checkDiv.append(stressButton);
 
+// const drawButton = document.createElement("button");
+// drawButton.innerHTML = "Draw Results!";
+// drawButton.classList.add("root");
+// drawButton.addEventListener("click", drawResults);
+// checkDiv.append(drawButton);
 
-const drawButton = document.createElement("button");
-drawButton.innerHTML = "Draw Results!";
-drawButton.classList.add("root");
-drawButton.addEventListener("click", drawResults);
-checkDiv.append(drawButton);
-
-
-function clear(){
+function clear() {
   clearScreen();
   drawSupports();
   emptyVars();
 }
 
-function clearScreen(){
+function clearScreen() {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
   img.onload();
   img.src = url;
 }
 
-function drawSupports(){
+// // matter-js stuff
+// var myCanvas = document.getElementById("world");
+
+// // module aliases
+// var Engine = Matter.Engine,
+//   // Render = Matter.Render,
+//   World = Matter.World,
+//   Bodies = Matter.Bodies,
+//   Constraint = Matter.Constraint;
+
+// // create an engine
+// var engine = Engine.create();
+
+// // create a renderer
+// var render = Matter.Render.create({
+//   canvas: myCanvas,
+//   element: document.body,
+//   engine: engine,
+//   options: {
+//     width: canvasWidth,
+//     height: canvasHeight,
+//     // background: 'transparent',
+//     background: "black",
+//     wireframes: false,
+//     showAngleIndicator: false,
+//   },
+// });
+
+function drawSupports() {
   pinSupport = new component(
     supportWidth,
     supportHeight,
@@ -225,7 +250,7 @@ function drawSupports(){
   );
 }
 
-function emptyVars(){
+function emptyVars() {
   lineList = [];
   pointList = [];
   pointList.push(pinPoint, rollPoint, weightPoint);
@@ -320,11 +345,11 @@ function makeLine() {
   let secondX = 0;
   let secondY = 0;
 
-  onmousedown = function(e) {
+  onmousedown = function (e) {
     firstX = e.clientX;
     firstY = e.clientY;
   };
-  onmouseup = function(e) {
+  onmouseup = function (e) {
     secondX = e.clientX;
     secondY = e.clientY;
     if (
@@ -347,7 +372,7 @@ function makeLine() {
       drawLine(lineList[lineList.length - 1]);
     }
   };
-  ondblclick = function(e) {
+  ondblclick = function (e) {
     let point = new Point(e.clientX, e.clientY);
     let temp = lineList;
     for (let line of temp) {
@@ -454,10 +479,15 @@ function applyBoundary() {
 }
 
 function Analyze() {
+  globalStiffness();
+  applyBoundary();
   try {
     solution = math.lusolve(math.multiply(stiffMatrix, E * Area), forceMatrix);
+    stressResults();
+    drawResults();
+
   } catch (err) {
-    alert("Truss unstable!");
+    // alert("Truss unstable!");
     playAnimation();
   }
 }
@@ -509,7 +539,7 @@ function drawResults() {
   drawStressFigure(lineList, lineStress);
 }
 
-function drawStressFigure(lineListLoc, lineStressLoc){
+function drawStressFigure(lineListLoc, lineStressLoc) {
   clearScreen();
   drawSupports();
   let count = 0;
@@ -520,22 +550,35 @@ function drawStressFigure(lineListLoc, lineStressLoc){
   drawScale();
 }
 
-function drawScale(){
+function drawScale() {
   ctx.font = colorScaleFontSize + "px Arial";
-  
-  var grd = ctx.createLinearGradient(colorScaleX,0,colorScaleX + colorScaleWidth,0);
-  grd.addColorStop(0,"black");
-  grd.addColorStop(0.25,"blue");
-  grd.addColorStop(0.5,"green");
-  grd.addColorStop(0.75,"red");
-  grd.addColorStop(1,"purple");
+
+  var grd = ctx.createLinearGradient(
+    colorScaleX,
+    0,
+    colorScaleX + colorScaleWidth,
+    0
+  );
+  grd.addColorStop(0, "black");
+  grd.addColorStop(0.25, "blue");
+  grd.addColorStop(0.5, "green");
+  grd.addColorStop(0.75, "red");
+  grd.addColorStop(1, "purple");
 
   // Fill with gradient
   ctx.fillStyle = grd;
   ctx.fillRect(colorScaleX, colorScaleY, colorScaleWidth, colorScaleHeight);
   ctx.fillStyle = "black";
-  ctx.fillText("0", colorScaleX, colorScaleY + colorScaleHeight + colorScaleFontSize);
-  ctx.fillText("1", colorScaleX + Math.floor(0.75 * colorScaleWidth), colorScaleY + colorScaleHeight+ colorScaleFontSize);
+  ctx.fillText(
+    "0",
+    colorScaleX,
+    colorScaleY + colorScaleHeight + colorScaleFontSize
+  );
+  ctx.fillText(
+    "1",
+    colorScaleX + Math.floor(0.75 * colorScaleWidth),
+    colorScaleY + colorScaleHeight + colorScaleFontSize
+  );
 }
 
 function addUniquePoint(point, pointList) {
@@ -608,28 +651,30 @@ function Point(x, y, number) {
   this.number = number;
   this.x = x;
   this.y = y;
-  this.distanceTo = function(P) {
+  this.distanceTo = function (P) {
     return ((x - P.x) ** 2 + (y - P.y) ** 2) ** 0.5;
   };
 }
 
 function arrayRemove(value, arr) {
-  return arr.filter(function(ele) {
+  return arr.filter(function (ele) {
     return ele !== value;
   });
 }
 
 function arrayRemovePoint(point, pointList) {
-  return pointList.filter(function(p) {
+  return pointList.filter(function (p) {
     return p.number !== point.number;
   });
 }
 
 function isPointOnLine(point, Line, tol) {
   if (Line.a === undefined) {
-    if (Math.abs(point.x - Line.pointFirst.x) < tol &&
-        ((point.y >= Line.pointFirst.y && point.y <= Line.pointSecond.y)
-        || (point.y <= Line.pointFirst.y && point.y >= Line.pointSecond.y))) {
+    if (
+      Math.abs(point.x - Line.pointFirst.x) < tol &&
+      ((point.y >= Line.pointFirst.y && point.y <= Line.pointSecond.y) ||
+        (point.y <= Line.pointFirst.y && point.y >= Line.pointSecond.y))
+    ) {
       return true;
     } else {
       return false;
@@ -644,11 +689,13 @@ function isPointOnLine(point, Line, tol) {
     let intersectY = Line.a * intersectX + Line.b;
     let dist =
       ((point.x - intersectX) ** 2 + (point.y - intersectY) ** 2) ** 0.5;
-    let intersectOnLineBoundary = ((intersectX >= Line.pointFirst.x && intersectX <= Line.pointSecond.x) 
-    || (intersectX <= Line.pointFirst.x && intersectX >= Line.pointSecond.x)) 
-        && ((intersectY >= Line.pointFirst.y && intersectY <= Line.pointSecond.y) 
-        || (intersectY <= Line.pointFirst.y && intersectY >= Line.pointSecond.y));
-    return (dist < tol && intersectOnLineBoundary) ? true : false;
+    let intersectOnLineBoundary =
+      ((intersectX >= Line.pointFirst.x && intersectX <= Line.pointSecond.x) ||
+        (intersectX <= Line.pointFirst.x &&
+          intersectX >= Line.pointSecond.x)) &&
+      ((intersectY >= Line.pointFirst.y && intersectY <= Line.pointSecond.y) ||
+        (intersectY <= Line.pointFirst.y && intersectY >= Line.pointSecond.y));
+    return dist < tol && intersectOnLineBoundary ? true : false;
   }
 }
 
@@ -659,19 +706,23 @@ function stressColor(stress) {
   let green = [0, 255, 0];
   let red = [255, 0, 0];
   let color = [0, 0, 0];
-  if (ratio >= 0 && ratio <= 0.33) { // color blue
+  if (ratio >= 0 && ratio <= 0.33) {
+    // color blue
     color[0] = 0;
     color[1] = 0;
     color[2] = Math.floor((ratio / 0.33) * 255);
-  } else if (ratio > 0.33 && ratio <= 0.66) { // color blue to green
+  } else if (ratio > 0.33 && ratio <= 0.66) {
+    // color blue to green
     color[0] = 0;
     color[1] = Math.floor(((ratio - 0.33) / 0.33) * 255);
     color[2] = Math.floor((1 - (ratio - 0.33) / 0.33) * 255);
-  } else if (ratio > 0.66 && ratio <= 1.0) { // color green to red
+  } else if (ratio > 0.66 && ratio <= 1.0) {
+    // color green to red
     color[0] = Math.floor(((ratio - 0.66) / 0.33) * 255);
     color[1] = Math.floor((1 - (ratio - 0.66) / 0.33) * 255);
     color[2] = 0;
-  } else if (ratio > 1){ // color purple
+  } else if (ratio > 1) {
+    // color purple
     color[0] = 255;
     color[1] = 0;
     color[2] = 255;
@@ -745,43 +796,10 @@ function Line(pointFirst, pointSecond, tol) {
   this.s = Math.sin(this.theta);
 }
 
-
-function playAnimation(){
-    // import decomp from "poly-decomp";
+function playAnimation() {
+  // import decomp from "poly-decomp";
 
   // window.decomp = decomp;
-
-  
-
-  var myCanvas = document.getElementById("world");
-
-  let canvasWidth = 480;
-  let canvasHeight = 270;
-
-  // module aliases
-  var Engine = Matter.Engine,
-    Render = Matter.Render,
-    World = Matter.World,
-    Bodies = Matter.Bodies,
-    Constraint = Matter.Constraint;
-
-  // create an engine
-  var engine = Engine.create();
-
-  // create a renderer
-  var render = Render.create({
-    canvas: myCanvas,
-    element: document.body,
-    engine: engine,
-    options: {
-      width: canvasWidth,
-      height: canvasHeight,
-      // background: 'transparent',
-      background: "black",
-      wireframes: false,
-      showAngleIndicator: false,
-    },
-  });
 
   // var body = Bodies.polygon(150, 200, 5, 30);
 
@@ -796,8 +814,8 @@ function playAnimation(){
   // // var boxA = Bodies.rectangle(400, 200, 80, 80);
   // // var boxB = Bodies.rectangle(450, 50, 80, 80);
   var frameA = Bodies.rectangle(100, 100, 50, 10, {
-  //   angle: (10 / 180) * Math.PI,
-  //   isStatic: true,
+    //   angle: (10 / 180) * Math.PI,
+    //   isStatic: true,
     render: {
       fillStyle: "white",
       strokeStyle: "white",
@@ -806,27 +824,27 @@ function playAnimation(){
   });
 
   var frameB = Bodies.rectangle(150, 100, 50, 10, {
-      // angle: (10 / 180) * Math.PI,
-      // isStatic: true,
-      render: {
-        fillStyle: "white",
-        strokeStyle: "white",
-        lineWidth: 1,
-      },
-    });
+    // angle: (10 / 180) * Math.PI,
+    // isStatic: true,
+    render: {
+      fillStyle: "white",
+      strokeStyle: "white",
+      lineWidth: 1,
+    },
+  });
 
-    var constraintMult = Constraint.create({
-      bodyA: frameA,
-      pointA: { x: 25, y: 0 },
-      bodyB: frameB,
-      pointB: { x: -25, y: 0 }
+  var constraintMult = Constraint.create({
+    bodyA: frameA,
+    pointA: { x: 25, y: 0 },
+    bodyB: frameB,
+    pointB: { x: -25, y: 0 },
   });
 
   var constraint = Constraint.create({
-      pointA: { x: 75, y: 100 },
-      bodyB: frameA,
-      pointB: { x: -25, y: 0 },
-    });
+    pointA: { x: 75, y: 100 },
+    bodyB: frameA,
+    pointB: { x: -25, y: 0 },
+  });
 
   var ground = Bodies.rectangle(
     canvasWidth / 2,
@@ -837,7 +855,7 @@ function playAnimation(){
   );
 
   // add all of the bodies to the world
-  World.add(engine.world, [ frameA , frameB, constraint, constraintMult,ground]);
+  World.add(engine.world, [frameA, frameB, constraint, constraintMult, ground]);
   // World.add(engine.world, [body, constraint]);
 
   // run the engine
@@ -845,25 +863,26 @@ function playAnimation(){
 
   // run the renderer
   Render.run(render);
-
-
 }
-
 
 function updateGameArea(line, lineListLoc, pointListLoc) {
   let count = 0;
-  for (let lineIter of lineListLoc){
-    if (line.pointFirst.number === lineIter.pointFirst.number || line.pointFirst.number === lineIter.pointSecond.number ||
-      line.pointSecond.number === lineIter.pointFirst.number || line.pointSecond.number === lineIter.pointSecond.number){
-        count += 1;
-        break;
-      }
+  for (let lineIter of lineListLoc) {
+    if (
+      line.pointFirst.number === lineIter.pointFirst.number ||
+      line.pointFirst.number === lineIter.pointSecond.number ||
+      line.pointSecond.number === lineIter.pointFirst.number ||
+      line.pointSecond.number === lineIter.pointSecond.number
+    ) {
+      count += 1;
+      break;
+    }
   }
-  if (count === 0){
+  if (count === 0) {
     pointListLoc = arrayRemovePoint(line.pointFirst, pointListLoc);
     pointListLoc = arrayRemovePoint(line.pointSecond, pointListLoc);
   }
-  
+
   lineListLoc = arrayRemove(line, lineListLoc);
   clearScreen();
   drawSupports();
